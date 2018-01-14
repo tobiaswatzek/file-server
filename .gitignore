@@ -12,3 +12,5 @@
 *.out
 
 file-server
+
+vendor/

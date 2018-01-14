@@ -3,7 +3,11 @@ package logger
 import (
 	"bytes"
 	"log"
+	"net/http"
 	"os"
+	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // LogLevel is the log level type
@@ -24,6 +28,7 @@ const (
 
 // Logger is a wrapper for the default log.
 type Logger interface {
+	Middleware(next http.Handler) http.Handler
 	SetLogLevel(level LogLevel)
 	GetLogLevel() LogLevel
 	Debug(format string, p ...interface{})
@@ -52,6 +57,18 @@ func NewLoggerWithLevel(level LogLevel) Logger {
 // NewLogger creates a new logger with the Info log level.
 func NewLogger() Logger {
 	return NewLoggerWithLevel(Info)
+}
+
+func (l *logger) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := uuid.NewV4().String()
+		l.InfoWithContext(ctx, "Received request for '%s'.", r.RequestURI)
+		begin := time.Now()
+		next.ServeHTTP(w, r)
+		end := time.Now()
+		processedIn := end.Sub(begin)
+		l.InfoWithContext(ctx, "Processed request for '%s' in %s.", r.RequestURI, processedIn)
+	})
 }
 
 func (l *logger) SetLogLevel(level LogLevel) {
