@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/justinas/alice"
 	"github.com/spitzfaust/file-server/logger"
@@ -35,8 +36,9 @@ func cleanPrefix(prefix string) string {
 // ProgramName is the program name.
 const ProgramName = "file-server"
 
-// Version is the program version.
-const Version = "v1.0.0"
+// Program version. Is set automatically in the build process.
+var version = "master"
+var date = time.Now().Format("2006-01-02")
 
 func disableCaching(next http.Handler) http.Handler {
 	var etagHeaders = []string{
@@ -63,7 +65,7 @@ func main() {
 	port := flag.String("p", "8100", "port to serve on")
 	prefix := flag.String("f", "", "path under which files should be exposed (e.g. /files/img)")
 	directory := flag.String("d", ".", "directory of static files on host (e.g. ./documents)")
-	version := flag.Bool("v", false, "display the version")
+	showVersion := flag.Bool("v", false, "display the version")
 	caching := flag.Bool("c", false, "enable client caching headers")
 	verbose := flag.Bool("l", false, "enable detailed logs")
 	flag.Parse()
@@ -74,12 +76,12 @@ func main() {
 	l.Debug("Port set to: %s", *port)
 	l.Debug("Prefix set to: %s", *prefix)
 	l.Debug("Directory set to: %s", *directory)
-	l.Debug("Version set to %t", *version)
+	l.Debug("Version set to %t", *showVersion)
 	l.Debug("Caching set to: %t", *caching)
 	l.Debug("Verbose set to: %t", *verbose)
 
-	if *version {
-		fmt.Printf("%s: %s\n", ProgramName, Version)
+	if *showVersion {
+		fmt.Printf("%s\nVersion:  %s\nBuilt on: %s\n", ProgramName, version, date)
 		return
 	}
 
