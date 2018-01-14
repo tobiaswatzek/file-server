@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strings"
 
+	"github.com/justinas/alice"
 	"github.com/spitzfaust/file-server/logger"
 )
 
@@ -22,6 +24,10 @@ func cleanPrefix(prefix string) string {
 		cleanedPrefix = ""
 	}
 	cleanedPrefix += "/"
+
+	if !strings.HasPrefix(cleanedPrefix, "/") {
+		cleanedPrefix = "/" + cleanedPrefix
+	}
 
 	return cleanedPrefix
 }
@@ -58,6 +64,7 @@ func main() {
 	prefix := flag.String("f", "", "path under which files should be exposed (e.g. /files/img)")
 	directory := flag.String("d", ".", "directory of static files on host (e.g. ./documents)")
 	version := flag.Bool("v", false, "display the version")
+	caching := flag.Bool("c", false, "enable client caching headers")
 	verbose := flag.Bool("l", false, "enable detailed logs")
 	flag.Parse()
 	l := logger.NewLoggerWithLevel(logger.Info)
@@ -68,6 +75,7 @@ func main() {
 	l.Debug("Prefix set to: %s", *prefix)
 	l.Debug("Directory set to: %s", *directory)
 	l.Debug("Version set to %t", *version)
+	l.Debug("Caching set to: %t", *caching)
 	l.Debug("Verbose set to: %t", *verbose)
 
 	if *version {
@@ -75,11 +83,15 @@ func main() {
 		return
 	}
 
-	handler := http.FileServer(http.Dir(*directory))
-
+	finalHandler := http.FileServer(http.Dir(*directory))
 	cleanedPrefix := cleanPrefix(*prefix)
 
-	http.Handle(cleanedPrefix, l.Middleware(disableCaching(http.StripPrefix(cleanedPrefix, handler))))
+	middlewareChain := alice.New(l.Middleware)
+	if !*caching {
+		middlewareChain = middlewareChain.Append(disableCaching)
+	}
+
+	http.Handle(cleanedPrefix, middlewareChain.Then(http.StripPrefix(cleanedPrefix, finalHandler)))
 
 	l.Info("Serving %s on HTTP port: %s\n", *directory, *port)
 	l.Info("Visit: http://localhost:%s%s", *port, cleanedPrefix)

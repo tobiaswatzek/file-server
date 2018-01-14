@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/justinas/alice"
+  packages = ["."]
+  revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
+
+[[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
@@ -10,6 +16,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4bfe0a295f998a250c53fcf0757ab85c1ab64e8cfbfd362e37614b3c7ee0e3db"
+  inputs-digest = "4aa282b21a5ac4b862281b887bc50f9c03c82624377251b086443b91540b25dc"
   solver-name = "gps-cdcl"
   solver-version = 1
