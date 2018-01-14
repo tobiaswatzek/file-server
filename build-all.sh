@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+version=$1
+if [[ -z "$version" ]]; then
+  echo "usage: $0 <version>"
+  exit 1
+fi
+
 package="github.com/spitzfaust/file-server"
 output_folder="build"
 package_split=(${package//\// })
@@ -12,7 +18,7 @@ do
     platform_split=(${platform//\// })
     GOOS=${platform_split[0]}
     GOARCH=${platform_split[1]}
-    output_name=$output_folder'/'$package_name'-'$GOOS'-'$GOARCH
+    output_name=$output_folder'/'$package_name'-'$GOOS'-'$GOARCH'-'$version
     if [ $GOOS = "windows" ]; then
         output_name+='.exe'
     fi
