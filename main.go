@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/justinas/alice"
 	"github.com/spitzfaust/file-server/logger"
@@ -38,7 +37,7 @@ const ProgramName = "file-server"
 
 // Program version. Is set automatically in the build process.
 var version = "master"
-var date = time.Now().Format("2006-01-02")
+var date = "Hallo"
 
 func disableCaching(next http.Handler) http.Handler {
 	var etagHeaders = []string{
